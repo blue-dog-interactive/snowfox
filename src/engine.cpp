@@ -1,7 +1,11 @@
 #include <stdio.h>
+
 #include "engine.hpp"
 
-int main(void) {
-    Engine engine;
-    printf("something has happened\n");
+void engine_create(Engine & engine) {
+    printf("engine created\n");
+}
+
+void engine_delete(Engine & engine) {
+    printf("engine deleted\n");
 }
