@@ -24,6 +24,7 @@ enum class Event {
     Swap,
     Poll,
     Tick,
+    Hand,
 };
 
 void engine_mode(Mode mode);

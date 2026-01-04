@@ -1,12 +1,20 @@
 #include "editor.hpp"
 #include "entity.hpp"
 
+static ID id;
+
 void editor_open(void) {
     Entity & ent = entity_make();
+    id = ent.id;
+    ent.version = 10829812;
 }
 
 void editor_shut(void) {
-    // nothing atm
+    Entity & ent = entity_find(id);
+
+    if(ent.type != Type::None) {
+        printf("entity id %d\n", ent.version);
+    }
 }
 
 void editor_mode(Mode mode) {

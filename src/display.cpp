@@ -1,13 +1,18 @@
+#include <cstddef>
 #include <windows.h>
 #include <stdio.h>
 
 #include "display.hpp"
-#include "engine.hpp"
+#include "opengl.hpp"
 
 #pragma comment(lib, "user32.lib")
+#pragma comment(lib, "gdi32.lib")
+#pragma comment(lib, "opengl32.lib")
 
-static WNDCLASS $class  = {};
-static HWND     $handle = {};
+static WNDCLASS $class   = {};
+static HWND     $handle  = {};
+static HDC      $device  = {};
+static HGLRC    $context = {};
 
 LRESULT CALLBACK display_window_procedure(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
@@ -64,8 +69,10 @@ void display_handle_create(void) {
         return;
     }
 
-    ShowWindow($handle, SW_SHOW);
+    ShowWindow($handle, SW_HIDE);
     UpdateWindow($handle);
+
+    engine_event(Event::Hand);
 }
 
 void display_open(void) {
@@ -74,9 +81,18 @@ void display_open(void) {
 }
 
 void display_shut(void) {
+
+    // release dc
+    ReleaseDC($handle, $device);
+
+    // delete render context
+    wglDeleteContext($context);
+
+    // destory handle
     DestroyWindow($handle);   // destroys all windows of that class
     $handle = nullptr;
 
+    // unregister class
     UnregisterClass("snowfox_display_class", GetModuleHandle(nullptr));
 }
 
@@ -90,10 +106,78 @@ void display_draw(void) {
             engine_state(State::Off);
         }
     }
+
+    if($context != NULL) {
+        if(!IsWindowVisible($handle)) {
+            ShowWindow($handle, SW_SHOW);
+        }
+
+        glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
 }
 
 void display_swap(void) {
+    SwapBuffers($device);
+}
 
+void display_hand(void) {
+
+    // create device context
+    $device = GetDC($handle);
+    if (!$device) {
+        printf("Failed to create device context!");
+        engine_state(State::Error);
+        return;
+    }
+
+    // create pixel format
+    PIXELFORMATDESCRIPTOR pfd = {};
+    pfd.nSize        = sizeof(pfd);
+    pfd.nVersion     = 1;
+    pfd.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.iPixelType   = PFD_TYPE_RGBA;
+    pfd.cColorBits   = 32;
+    pfd.cAlphaBits   = 8;
+    pfd.cDepthBits   = 24;
+    pfd.cStencilBits = 8;
+    pfd.iLayerType   = PFD_MAIN_PLANE;
+
+    int pf = ChoosePixelFormat($device, &pfd);
+    if (pf == 0) {
+        printf("Failed to create pixel format!");
+        engine_state(State::Error);
+        return;
+    }
+
+    // set pixel format
+    if (!SetPixelFormat($device, pf, &pfd)) {
+        printf("Failed to select pixel format!");
+        engine_state(State::Error);
+        return;
+    }
+
+    // make context
+    $context = wglCreateContext($device);
+    if (!$context) {
+        printf("Failed to create render context!");
+        engine_state(State::Error);
+        return;
+    }
+
+    // make context current
+    if (!wglMakeCurrent($device, $context)) {
+        printf("Failed to set render context!");
+        engine_state(State::Error);
+        return;
+    }
+
+    // load opengl functions
+    if (!gladLoadGL()) {
+        printf("Failed to load glad/opengl functions!");
+        engine_state(State::Error);
+        return;
+    }
 }
 
 void display_mode(Mode mode) {
@@ -109,4 +193,5 @@ void display_event(Event event) {
     if(event == Event::Shut) display_shut();
     if(event == Event::Draw) display_draw();
     if(event == Event::Swap) display_swap();
+    if(event == Event::Hand) display_hand();
 }
