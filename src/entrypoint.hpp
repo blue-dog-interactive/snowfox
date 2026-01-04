@@ -1,5 +1,5 @@
 #pragma once
 
 /*
-    Some sort of thesis message here.
+    Some sort of thesis message here
 */

@@ -1,8 +1,29 @@
 #pragma once
 
-struct Engine {
-    // something
+enum class Mode {
+    None,
+    Play,
+    Edit,
+    Pause
 };
 
-void engine_create(Engine & engine);
-void engine_delete(Engine & engine);
+enum class State {
+    None,
+    On,
+    Off,
+    Error,
+};
+
+enum class Event {
+    None,
+    Boot,
+    Kill,
+    Open,
+    Shut,
+    Draw,
+    Swap
+};
+
+void engine_mode(Mode mode);
+void engine_state(State state);
+void engine_event(Event event);

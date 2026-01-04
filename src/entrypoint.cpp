@@ -2,11 +2,7 @@
 #include "engine.hpp"
 
 int main(void) {
-    Engine engine;
-    engine_create(engine);
-
-
-
-
-    engine_delete(engine);
+    engine_mode(Mode::Play);
+    engine_state(State::On);
+    engine_event(Event::Boot);
 }
