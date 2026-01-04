@@ -3,6 +3,8 @@
 
 #include "engine.hpp"
 #include "display.hpp"
+#include "editor.hpp"
+#include "entity.hpp"
 
 static Mode  $mode  = Mode::None;
 static State $state = State::None;
@@ -17,6 +19,11 @@ void engine_boot(void) {
     while($state == State::On) {
         engine_event(Event::Draw);
         engine_event(Event::Swap);
+
+        if($mode == Mode::Play) {
+            engine_event(Event::Poll);
+            // TODO: add tick based on tickerate.
+        }
     }
 
     // shut
@@ -37,6 +44,8 @@ void engine_mode(Mode mode) {
     $mode = mode;
 
     display_mode(mode);
+    entity_mode(mode);
+    editor_mode(mode);
 }
 
 void engine_state(State state) {
@@ -45,6 +54,8 @@ void engine_state(State state) {
     if($state == State::Error) engine_error();
 
     display_state(state);
+    entity_state(state);
+    editor_state(state);
 }
 
 void engine_event(Event event) {
@@ -54,4 +65,6 @@ void engine_event(Event event) {
     if(event == Event::Kill) engine_kill();
 
     display_event(event);
+    entity_event(event);
+    editor_event(event);
 }

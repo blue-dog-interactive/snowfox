@@ -6,8 +6,8 @@
 
 #pragma comment(lib, "user32.lib")
 
-static WNDCLASS $display_class  = {};
-static HWND     $display_handle = {};
+static WNDCLASS $class  = {};
+static HWND     $handle = {};
 
 LRESULT CALLBACK display_window_procedure(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
@@ -31,26 +31,26 @@ LRESULT CALLBACK display_window_procedure(HWND hwnd, UINT uMsg, WPARAM wParam, L
 }
 
 void display_register_class(void) {
-    $display_class.lpfnWndProc   = display_window_procedure;
-    $display_class.hInstance     = GetModuleHandle(nullptr);
-    $display_class.lpszClassName = "snowfox_display_class";
-    $display_class.hCursor       = LoadCursor(nullptr, IDC_ARROW);
-    $display_class.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    $class.lpfnWndProc   = display_window_procedure;
+    $class.hInstance     = GetModuleHandle(nullptr);
+    $class.lpszClassName = "snowfox_display_class";
+    $class.hCursor       = LoadCursor(nullptr, IDC_ARROW);
+    $class.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 
-    RegisterClass(&$display_class);
+    RegisterClass(&$class);
 }
 
 void display_handle_create(void) {
     SetProcessDPIAware();
 
-    $display_handle = CreateWindowEx(
+    $handle = CreateWindowEx(
         0,                       // Optional window styles.
         "snowfox_display_class", // Window class
         "Snowfox Engine",        // Window text
         WS_OVERLAPPEDWINDOW,     // Window style
 
         // Size and position
-        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+        CW_USEDEFAULT, CW_USEDEFAULT, 500, 500,
 
         NULL,                      // Parent window
         NULL,                      // Menu
@@ -58,14 +58,14 @@ void display_handle_create(void) {
         NULL                       // Additional application data
     );
 
-    if ($display_handle == NULL) {
+    if ($handle == NULL) {
         printf("Failed to create display handle!");
         engine_state(State::Error);
         return;
     }
 
-    ShowWindow($display_handle, SW_SHOW);
-    UpdateWindow($display_handle);
+    ShowWindow($handle, SW_SHOW);
+    UpdateWindow($handle);
 }
 
 void display_open(void) {
@@ -74,8 +74,8 @@ void display_open(void) {
 }
 
 void display_shut(void) {
-    DestroyWindow($display_handle);   // destroys all windows of that class
-    $display_handle = nullptr;
+    DestroyWindow($handle);   // destroys all windows of that class
+    $handle = nullptr;
 
     UnregisterClass("snowfox_display_class", GetModuleHandle(nullptr));
 }

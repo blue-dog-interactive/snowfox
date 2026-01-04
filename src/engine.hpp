@@ -21,7 +21,9 @@ enum class Event {
     Open,
     Shut,
     Draw,
-    Swap
+    Swap,
+    Poll,
+    Tick,
 };
 
 void engine_mode(Mode mode);
